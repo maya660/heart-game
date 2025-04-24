@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>❤️ Notre Chasse aux Cœurs ❤️</title>
+    <script src="https://kaboomjs.com/lib/0.5.1/kaboom.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #game { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="game"></div>
+    <script>
+        kaboom({
+            global: true,
+            width: 800,
+            height: 600,
+            background: [135, 206, 235],
+            canvas: document.getElementById("game"),
+        });
+
+        // ⚠️ Remplacez ces URLs par vos photos (format carré 1:1)
+        const PHOTO_TOI = "https://i.imgur.com/your_photo1.jpg";
+        const PHOTO_LUI = "https://i.imgur.com/your_photo2.jpg";
+
+        loadRoot("https://i.imgur.com/");
+        loadSprite("toi", PHOTO_TOI);
+        loadSprite("lui", PHOTO_LUI);
+        loadSprite("coeur", "gXQq1nP.png"); // Cœur par défaut
+
+        const score = {
+            toi: 0,
+            lui: 0
+        };
+
+        const toi = add([
+            sprite("toi"),
+            pos(100, 300),
+            area(),
+            scale(0.15), // Ajustez la taille ici
+            "joueur"
+        ]);
+
+        const lui = add([
+            sprite("lui"),
+            pos(700, 300),
+            area(),
+            scale(0.15), // Ajustez la taille ici
+            "joueur"
+        ]);
+
+        // Créer 10 cœurs
+        for (let i = 0; i < 10; i++) {
+            add([
+                sprite("coeur"),
+                pos(rand(50, width() - 50), rand(50, height() - 50)),
+                area(),
+                "coeur",
+                { valeur: 1 }
+            ]);
+        }
+
+        // Contrôles pour les deux joueurs
+        onKeyDown("z", () => toi.move(0, -5));
+        onKeyDown("s", () => toi.move(0, 5));
+        onKeyDown("q", () => toi.move(-5, 0));
+        onKeyDown("d", () => toi.move(5, 0));
+
+        onKeyDown("arrowup", () => lui.move(0, -5));
+        onKeyDown("arrowdown", () => lui.move(0, 5));
+        onKeyDown("arrowleft", () => lui.move(-5, 0));
+        onKeyDown("arrowright", () => lui.move(5, 0));
+
+        // Collision avec les cœurs
+        toi.onCollide("coeur", (c) => {
+            destroy(c);
+            score.toi += c.valeur;
+            play("coin");
+        });
+
+        lui.onCollide("coeur", (c) => {
+            destroy(c);
+            score.lui += c.valeur;
+            play("coin");
+        });
+
+        // Affichage du score
+        const scoreText = add([
+            text(`Toi: ${score.toi} - Lui: ${score.lui}`, { size: 24 }),
+            pos(20, 20),
+            fixed()
+        ]);
+
+        // Mettre à jour le score
+        onUpdate(() => {
+            scoreText.text = `Toi: ${score.toi} - Lui: ${score.lui}`;
+            
+            if (getAll("coeur").length === 0) {
+                add([
+                    text("❤️ Vous avez collecté tous les cœurs ! ❤️", { 
+                        size: 32,
+                        width: width() - 100
+                    }),
+                    pos(center().sub(0, 50)),
+                    color(255, 0, 100),
+                    area()
+                ]);
+            }
+        });
+
+        // Son (optionnel)
+        loadSound("coin", "https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1992.mp3");
+    </script>
+</body>
+</html>
